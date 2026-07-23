@@ -1,0 +1,46 @@
+from numpy import *
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+def fun(x,y,x0,y0,sigma=80,height=10):
+    z=height*exp(-((x-x0)**2+(y-y0)**2)/sigma)
+    return z
+
+def gr(x,y,x0,y0):
+    d=0.01
+    dx=(fun(x+d,y,x0,y0)-fun(x,y,x0,y0))/d
+    dy=(fun(x,y+d,x0,y0)-fun(x,y,x0,y0))/d
+    return dx,dy
+
+def norm(px,py,size,x0,y0):
+    vx,vy=gr(px,py,x0,y0)
+    nrm = array([[-vx, -vy, 1]]) / linalg.norm([-vx, -vy, 1])
+    nrm=nrm*2
+    return nrm
+
+def surf(sx,sy,step,frame,r):
+    for b in linspace(0,2*pi,frame):
+        start=array([]).reshape(0, 3)
+        n=array([]).reshape(0, 3)
+        fig = plt.figure(figsize=(12, 8))
+        ax = fig.add_subplot(111, projection='3d')
+        x0,y0=r*cos(b),r*sin(b)
+        for i in range(0,len(x),step):
+            for j in range(0,len(y),step):
+                z=fun(sx,sy,x0,y0)
+                px=sx[i,j]
+                py=sy[i,j]
+                pz=z[i,j]
+                nrm=norm(px,py,2,x0,y0)
+                start=vstack((start,[px,py,pz]))
+                n=vstack((n,nrm))
+        ax.plot_surface(sx,sy,z,cmap='plasma',alpha=0.8)
+        ax.quiver(start[:,0],start[:,1],start[:,2],n[:,0],n[:,1],n[:,2]
+                  ,length=1,color='black',alpha=0.2)
+        plt.show()
+        
+x=linspace(-20,20,40)
+y=linspace(-20,20,40)
+sx,sy=meshgrid(x,y)
+#تمام عملیات یا تابع surf و وارد کردن نقاط و گام و تعداد فریم و شعاع حرکت انجام میشود
+surf(sx,sy,3,15,5) 
